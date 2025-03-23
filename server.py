@@ -33,6 +33,7 @@ def fetch_and_parse_gtfs():
             utc_dt = datetime.fromtimestamp(vehicle_info.timestamp).replace(tzinfo=pytz.utc)
             pacific_dt = utc_dt.astimezone(pacific_tz)
             # Prepare the data for uploading to Supabase
+            print(f"Vehicle ID: {vehicle_info.vehicle.id} Timestamp: {pacific_dt.isoformat()}")
             vehicle_data.append({
                 "trip_id": trip_info.trip_id,
                 "start_date": trip_info.start_date,
@@ -48,33 +49,33 @@ def fetch_and_parse_gtfs():
                 "congestion_level": vehicle_info.congestion_level,
                 "vehicle_id": vehicle_info.vehicle.id,
                 "vehicle_label": vehicle_info.vehicle.label,
-                
-                "timestamp": pacific_dt.isoformat()            })
-    
+                "timestamp": pacific_dt.isoformat()            
+                })
     return vehicle_data
 
 def store_in_supabase(data):
     try:
         response = supabase.table("trip_data").insert(data).execute()
-        print(f"Data inserted successfully, {len(data)} records added")
         return response
     except Exception as e:
         print(f"Error inserting data: {str(e)}")
         return None
     
 def fetch_parse_and_upload():
-    data = fetch_and_parse_gtfs()
-
-    if data:
-        store_in_supabase(data)
-
+    try:
+        data = fetch_and_parse_gtfs()
+        if data:
+            store_in_supabase(data)
+            print(f"{len(data)} Data stored in Supabase")
+    except Exception as e:
+        print(f"Error in background task: {str(e)}")
 @app.get("/")
 def read_root():
     return {"message": "The server is running"}
 
 if __name__ == "__main__":
     scheduler = BackgroundScheduler()
-    scheduler.add_job(fetch_parse_and_upload, 'interval', minutes=1)
+    scheduler.add_job(fetch_parse_and_upload, 'interval', seconds=10)
     scheduler.start()
     print("Scheduler started")
     uvicorn.run(app, host="0.0.0.0", port=8000)

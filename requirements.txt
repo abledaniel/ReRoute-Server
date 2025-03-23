@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+apscheduler
+gtfs-realtime-bindings
+requests
+pytz
+supabase
+python-dotenv
+protobuf
