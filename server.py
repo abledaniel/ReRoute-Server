@@ -3,11 +3,15 @@ from supabase import create_client
 import gtfs_realtime_pb2
 from dotenv import load_dotenv
 from datetime import datetime
+from fastapi import FastAPI
+from apscheduler.schedulers.background import BackgroundScheduler
+import uvicorn
 import pytz
 import os
 
 load_dotenv()
 
+app = FastAPI()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_API_KEY = os.getenv("SUPABASE_API_KEY")
@@ -57,10 +61,20 @@ def store_in_supabase(data):
     except Exception as e:
         print(f"Error inserting data: {str(e)}")
         return None
+    
 def fetch_parse_and_upload():
     data = fetch_and_parse_gtfs()
 
     if data:
         store_in_supabase(data)
 
-fetch_parse_and_upload()
+@app.get("/")
+def read_root():
+    return {"message": "The server is running"}
+
+if __name__ == "__main__":
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(fetch_parse_and_upload, 'interval', minutes=1)
+    scheduler.start()
+    print("Scheduler started")
+    uvicorn.run(app, host="0.0.0.0", port=8000)
