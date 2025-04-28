@@ -1,9 +1,13 @@
-fastapi
-uvicorn
-apscheduler
-gtfs-realtime-bindings
-requests
-pytz
-supabase
-python-dotenv
-protobuf
+# fastapi
+# uvicorn
+# gtfs-realtime-bindings
+# requests
+# pytz
+# supabase
+# python-dotenv
+# protobuf
+
+flask==2.0.1
+flask-cors==3.0.10
+protobuf==3.17.3
+requests==2.26.0

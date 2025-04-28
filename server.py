@@ -4,7 +4,6 @@ import gtfs_realtime_pb2
 from dotenv import load_dotenv
 from datetime import datetime
 from fastapi import FastAPI
-from apscheduler.schedulers.background import BackgroundScheduler
 import uvicorn
 import pytz
 import os
@@ -68,13 +67,15 @@ def fetch_parse_and_upload():
             print(f"{len(data)} Data stored in Supabase")
     except Exception as e:
         print(f"Error in background task: {str(e)}")
+
 @app.get("/")
 def read_root():
     return {"message": "The server is running"}
 
+@app.get("/fetch-data")
+def trigger_fetch():
+    fetch_parse_and_upload()
+    return {"message": "Data fetch triggered"}
+
 if __name__ == "__main__":
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(fetch_parse_and_upload, 'interval', seconds=30)
-    scheduler.start()
-    print("Scheduler started")
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8080)
