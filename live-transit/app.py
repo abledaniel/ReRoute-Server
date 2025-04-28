@@ -4,7 +4,6 @@ import gtfs_realtime_pb2
 import requests
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
 
 @app.route('/api/vehicle-positions/<route_id>', methods=['GET'])
 def get_vehicle_positions_by_route(route_id):
@@ -17,7 +16,6 @@ def get_vehicle_positions_by_route(route_id):
         for entity in feed.entity:
             if entity.HasField('vehicle'):
                 vehicle = entity.vehicle
-                # Filter by route_id
                 if vehicle.trip.route_id == route_id:
                     vehicles.append({
                         "trip_id": vehicle.trip.trip_id,
@@ -40,4 +38,4 @@ def get_vehicle_positions_by_route(route_id):
         }), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run()
