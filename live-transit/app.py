@@ -4,6 +4,7 @@ import gtfs_realtime_pb2
 import requests
 
 app = Flask(__name__)
+CORS(app, origins="*", methods=["GET", "OPTIONS"], allow_headers=["Content-Type", "Authorization"])
 
 @app.route('/api/vehicle-positions/<route_id>', methods=['GET'])
 def get_vehicle_positions_by_route(route_id):
